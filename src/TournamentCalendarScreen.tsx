@@ -20,7 +20,7 @@ import { Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
+import LottieView from 'lottie-react-native';
 interface Match {
   id: number;
   stage: string;
@@ -208,7 +208,11 @@ const TournamentCalendarScreen: React.FC = () => {
   };
 
   const getHighlightDays = () => {
-    const filtered = getFilteredTournaments();
+    const filtered = allTournaments.filter(t => {
+      const date = new Date(t.start_date);
+      const m = date.getMonth() + 1;
+      return m >= 8 && m <= 10 && date.getFullYear() === 2025;
+    });
     const days = new Set(
       filtered
         .filter(t => new Date(t.start_date).getMonth() + 1 === currentMonth)
@@ -449,7 +453,9 @@ const TournamentCalendarScreen: React.FC = () => {
           monthNames={monthNames}
         />
         {filteredTournaments.length === 0 ? (
-          <Text style={styles.noData}>No data</Text>
+          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            <Text style={styles.noData}>No sports event</Text>
+          </View>
         ) : (
           <FlatList
             data={filteredTournaments.slice(0, visibleCount)}
@@ -525,7 +531,7 @@ const styles = StyleSheet.create({
   dropdownItemText: {
     fontSize: 16,
     color: '#333',
-     fontFamily: 'SourceSans3-SemiBold'
+    fontFamily: 'SourceSans3-SemiBold'
   },
   calendarSkeleton: {
     padding: 10,

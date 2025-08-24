@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { widthPercentageToDP } from 'react-native-responsive-screen';
@@ -30,7 +31,6 @@ const Calendar: React.FC<CalendarProps> = ({
   const offset = (firstDay - weekStart + 7) % 7;
 
   const calendarDays: { day: number; current: boolean }[] = [];
-
 
   for (let i = 0; i < offset; i++) {
     const day = prevDaysInMonth - offset + 1 + i;
@@ -78,7 +78,7 @@ const Calendar: React.FC<CalendarProps> = ({
             <TouchableOpacity
               key={i}
               onPress={() => {
-                if (d.current && highlightDays.has(d.day)) {
+                if (d.current) {
                   onDateSelect(d.day);
                 } else {
                   onDateSelect(null);
@@ -97,8 +97,8 @@ const Calendar: React.FC<CalendarProps> = ({
                   style={[
                     styles.dayText,
                     !d.current && styles.grayDay,
-                    isHighlighted && styles.highlightedText,
-                    isSelected && styles.selectedText,
+                    isHighlighted && !isSelected && styles.highlightedText,
+                    isSelected && styles.selectedText
                   ]}
                 >
                   {String(d.day).padStart(2, '0')}
@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   highlightedDay: {
     fontWeight: 'bold',
     borderRadius: 15,
+    backgroundColor: '#e0e0e0', // Light gray background for highlighted days
   },
   highlightedText: {
     color: 'black',
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectedText: {
-    color: 'white',
+    color: '#fff',
     fontWeight: 'bold',
   },
   dayText: {
