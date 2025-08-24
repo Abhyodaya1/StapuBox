@@ -10,6 +10,7 @@ import {
   Pressable,
   Modal,
   FlatList,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
@@ -18,6 +19,7 @@ import TournamentCard from './components/TournamentCard';
 import { Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 interface Match {
   id: number;
@@ -42,7 +44,7 @@ interface Tournament {
 }
 
 interface Sport {
-  sports_id: number;
+  sport_id: number | string;
   sport_name: string;
   tournaments: Tournament[];
 }
@@ -72,6 +74,7 @@ const TournamentCalendarScreen: React.FC = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [likedTournaments, setLikedTournaments] = useState<Set<number>>(new Set());
+  const slideAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
     loadCachedData();
@@ -127,7 +130,12 @@ const TournamentCalendarScreen: React.FC = () => {
       const json = await response.json();
       console.log('Sports API Response:', json);
       if (json.status === 'success') {
-        setSports([{ sports_id: 'ALL', sport_name: 'All', tournaments: [] }, ...json.data]);
+        const processedSports = json.data.map(sport => ({
+          sport_id: sport.sport_id || sport.sport_code || `sport_${Math.random().toString(36).substr(2, 9)}`, // Fallback if both are missing
+          sport_name: sport.sport_name,
+          tournaments: [],
+        }));
+        setSports([{ sport_id: 'ALL', sport_name: 'All', tournaments: [] }, ...processedSports]);
       } else {
         throw new Error('Failed to fetch sports');
       }
@@ -154,7 +162,7 @@ const TournamentCalendarScreen: React.FC = () => {
       console.log('Tournaments API Response:', json);
       if (json.status === 'success') {
         const tournaments = json.data.flatMap(sport =>
-          sport.tournaments.map(t => ({ ...t, sport_id: sport.sports_id, sport_name: sport.sport_name }))
+          sport.tournaments.map(t => ({ ...t, sport_id: sport.sport_id, sport_name: sport.sport_name }))
         );
         const sorted = tournaments.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
         setAllTournaments(sorted);
@@ -323,6 +331,22 @@ const TournamentCalendarScreen: React.FC = () => {
     </View>
   );
 
+  useEffect(() => {
+    if (isDropdownVisible) {
+      Animated.timing(slideAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isDropdownVisible, slideAnim]);
+
   if (error) {
     return (
       <View style={styles.errorContainer}>
@@ -352,34 +376,57 @@ const TournamentCalendarScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search tournaments..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-        />
-        <Pressable style={styles.sportSelector} onPress={() => setIsDropdownVisible(true)}>
-          <Text style={styles.selectedSportText}>
-            {sports.find(s => s.sports_id === Number(selectedSport))?.sport_name || 'Select Sport'}
-          </Text>
-          <Text style={styles.dropdownArrow}>▼</Text>
+        <Pressable style={styles.sportSelector} onPress={() => setIsDropdownVisible(!isDropdownVisible)}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search sports..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            placeholderTextColor="grey"
+          />
+          <FontAwesome name={isDropdownVisible ? 'angle-up' : 'angle-down'} size={20} color="#333" />
         </Pressable>
         <Modal
           transparent={true}
           visible={isDropdownVisible}
-          animationType="fade"
+          animationType="none"
           onRequestClose={() => setIsDropdownVisible(false)}
         >
           <Pressable style={styles.modalOverlay} onPress={() => setIsDropdownVisible(false)}>
-            <View style={styles.dropdownContainer}>
+            <Animated.View
+              style={[
+                styles.dropdownContainer,
+                {
+                  transform: [
+                    {
+                      translateY: slideAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-300, 0],
+                      }),
+                    },
+                  ],
+                  shadowColor: '#fff',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: slideAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0.5],
+                  }),
+                  shadowRadius: 10,
+                  elevation: slideAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 10],
+                  }),
+                },
+              ]}
+            >
               <FlatList
                 data={sports}
                 renderItem={({ item }) => (
                   <Pressable
                     style={styles.dropdownItem}
                     onPress={() => {
-                      setSelectedSport(item.sports_id.toString());
+                      setSelectedSport((item.sport_id || '').toString());
                       setSelectedDate(null);
                       setIsDropdownVisible(false);
                     }}
@@ -387,9 +434,9 @@ const TournamentCalendarScreen: React.FC = () => {
                     <Text style={styles.dropdownItemText}>{item.sport_name}</Text>
                   </Pressable>
                 )}
-                keyExtractor={item => item.sports_id.toString()}
+                keyExtractor={item => (item?.sport_id ? item.sport_id.toString() : Math.random().toString())}
               />
-            </View>
+            </Animated.View>
           </Pressable>
         </Modal>
         <Calendar
@@ -432,47 +479,28 @@ const TournamentCalendarScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   safeArea: { 
-    flex: 1 ,
-    backgroundColor:'#fff'
+    flex: 1,
+    backgroundColor: '#fff'
   },
   container: {
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: wp('2%')
   },
-  searchBar: {
-    height: 50,
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 10,
-    margin: 10,
-    borderRadius: 5,
-  },
-  searchBarSkeleton: {
-    height: 50,
-    backgroundColor: '#e0e0e0',
-    margin: 10,
-    borderRadius: 5,
-  },
   sportSelector: {
     height: 50,
     backgroundColor: '#f8f4f0',
-    padding: 10,
+    paddingHorizontal: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     margin: 10,
+    borderRadius: 5,
   },
-  sportPickerSkeleton: {
-    height: 50,
-    backgroundColor: '#e0e0e0',
-    margin: 10,
-  },
-  selectedSportText: {
+  searchInput: {
+    flex: 1,
+    height: '100%',
     fontSize: 16,
-    color: '#333',
-  },
-  dropdownArrow: {
-    fontSize: 18,
     color: '#333',
   },
   modalOverlay: {
@@ -480,13 +508,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: 60,
+    paddingTop: 70,
   },
   dropdownContainer: {
-    width: 40,
+    width: wp('90%'),
     backgroundColor: '#fff',
     borderRadius: 10,
-    maxHeight: 300,
+    maxHeight: 210,
     elevation: 5,
   },
   dropdownItem: {
@@ -497,6 +525,7 @@ const styles = StyleSheet.create({
   dropdownItemText: {
     fontSize: 16,
     color: '#333',
+     fontFamily: 'SourceSans3-SemiBold'
   },
   calendarSkeleton: {
     padding: 10,
@@ -544,6 +573,17 @@ const styles = StyleSheet.create({
   retryText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  searchBarSkeleton: {
+    height: 50,
+    backgroundColor: '#e0e0e0',
+    margin: 10,
+    borderRadius: 5,
+  },
+  sportPickerSkeleton: {
+    height: 50,
+    backgroundColor: '#e0e0e0',
+    margin: 10,
   },
 });
 

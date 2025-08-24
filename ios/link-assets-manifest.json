@@ -1,0 +1,69 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/SourceSans3-Black.ttf",
+      "sha1": "d6777ff17691642ff4c255e5e06443e27d453204"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-BlackItalic.ttf",
+      "sha1": "2184485d3ab87b7cba93b2ac5d60de7144ae7b2b"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-Bold.ttf",
+      "sha1": "3929894d6093792ffa827a26738340fffebdc36d"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-BoldItalic.ttf",
+      "sha1": "ad3d8f845158fa36b5b52b6160a9f493a1bcf602"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-ExtraBold.ttf",
+      "sha1": "9878167aa7bc2338262806eb04736f7ccc8f730a"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-ExtraBoldItalic.ttf",
+      "sha1": "a7ed32a1b80e26198be41f8a26ad3cabadf55c5c"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-ExtraLight.ttf",
+      "sha1": "9d238629fa0488b21ba9138576ca0cc9bf390ff5"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-ExtraLightItalic.ttf",
+      "sha1": "e857ae45a81d788c12cdb7e9e0b37be33086d181"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-Italic.ttf",
+      "sha1": "6d877395d3e596ed6cb6f497095eb29ea7fbd385"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-Light.ttf",
+      "sha1": "d3e3789622ef9a2e837cf2be81b27bc4108fe49c"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-LightItalic.ttf",
+      "sha1": "0269f974a382bc906cbe16d2c0ebcee1275213d1"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-Medium.ttf",
+      "sha1": "47a5f982433475630fe9ee100a6b8311eb774228"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-MediumItalic.ttf",
+      "sha1": "e4ac9223c819bab76106a3cb82e7479aac83f646"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-Regular.ttf",
+      "sha1": "1adfe09cc152037c2dcd2562b8d16dbe24ae759f"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-SemiBold.ttf",
+      "sha1": "52c29f5455878c1421edb7ebc0af61f5ddc7a2b4"
+    },
+    {
+      "path": "src/assets/fonts/SourceSans3-SemiBoldItalic.ttf",
+      "sha1": "580721d9706e40d56a047d2dbfeb6fe4a0354cfd"
+    }
+  ]
+}
